@@ -26,6 +26,7 @@ class Walker:
 
 pygame.init()
 pygame.display.set_caption('Random walker')
+clock = pygame.time.Clock()
 screen = pygame.display.set_mode((640, 480))
 screen.fill((255, 255, 255))
 walker = Walker()
@@ -39,6 +40,7 @@ while running:
   walker.step()
   walker.draw()
 
+  clock.tick(60)
   pygame.display.flip()
 
 pygame.quit()
