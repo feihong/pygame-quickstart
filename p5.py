@@ -2,9 +2,9 @@ import pygame
 
 # Global variables
 screen = None
-stroke_color = (0, 0, 0)
+stroke_color = None
 stroke_width = 0
-fill_color = (0, 0, 0)
+fill_color = None
 _width, _height = (100, 100)
 
 def createCanvas(w, h):
@@ -24,13 +24,21 @@ def background(*args):
     args = args * 3
   screen.fill(args)
 
+def noStroke():
+  global stroke_color
+  stroke_color = None
+
+def noFill():
+  global fill_color
+  fill_color = None
+
 def stroke(*args):
   global stroke_color
   if len(args) == 1:
     args = args * 3
   stroke_color = args
 
-def strokeWidth(value):
+def strokeWeight(value):
   global stroke_width
   stroke_width = value
 
@@ -41,12 +49,17 @@ def fill(*args):
   fill_color = args
 
 def point(x, y):
-  screen.lock()
-  screen.set_at((x, y), stroke_color)
-  screen.unlock()
+  if stroke_color is not None:
+    screen.lock()
+    screen.set_at((x, y), stroke_color)
+    screen.unlock()
 
 def rect(x, y, w, h):
-  pygame.draw.rect(screen, fill_color, (x, y, w, h), stroke_width)
+  if stroke_color is not None and stroke_width >= 0:
+    pygame.draw.rect(screen, stroke_color, (x, y, w, h), stroke_width)
+  if fill_color is not None:
+    sw2 = stroke_width + stroke_width
+    pygame.draw.rect(screen, fill_color, (x+stroke_width, y+stroke_width, w - sw2, h - sw2))
 
 def constrain(v, min, max):
   if v < min:

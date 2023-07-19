@@ -28,10 +28,10 @@ class Walker:
 walker = None
 
 def setup():
-	global walker
-	createCanvas(640, 240)
-	walker = Walker()
-	background(255)
+  global walker
+  createCanvas(640, 240)
+  walker = Walker()
+  background(255)
 
 def draw():
   walker.step()
