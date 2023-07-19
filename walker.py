@@ -1,46 +1,40 @@
 import random
-import pygame
+from p5 import *
 
 class Walker:
-	def __init__(self):
-		width, height = screen.get_size()
-		self.x = width // 2
-		self.y = height // 2
+  def __init__(self):
+    self.x = width() // 2
+    self.y = height() // 2
+    print(width, height)
 
-	def draw(self):
-		color = (0, 0, 0)
-		screen.lock()
-		screen.set_at((self.x, self.y), color)
-		screen.unlock()
+  def show(self):
+    stroke(0)
+    point(self.x, self.y)
 
-	def step(self):
-		choice = random.randint(0, 3)
-		if choice == 0:
-			self.x += 1
-		elif choice == 1:
-			self.x -= 1
-		elif choice == 2:
-			self.y += 1
-		else:
-			self.y -= 1
+  def step(self):
+    choice = random.randint(0, 3)
+    if choice == 0:
+      self.x += 1
+    elif choice == 1:
+      self.x -= 1
+    elif choice == 2:
+      self.y += 1
+    else:
+      self.y -= 1
 
-pygame.init()
-pygame.display.set_caption('Random walker')
-clock = pygame.time.Clock()
-screen = pygame.display.set_mode((640, 480))
-screen.fill((255, 255, 255))
-walker = Walker()
+    self.x = constrain(self.x, 0, width())
+    self.y = constrain(self.y, 0, height())
 
-running = True
-while running:
-  for event in pygame.event.get():
-    if event.type == pygame.QUIT:
-      running = False
+walker = None
 
+def setup():
+	global walker
+	createCanvas(640, 240)
+	walker = Walker()
+	background(255)
+
+def draw():
   walker.step()
-  walker.draw()
+  walker.show()
 
-  clock.tick(60)
-  pygame.display.flip()
-
-pygame.quit()
+run('Random walk traditional', setup, draw)
