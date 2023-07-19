@@ -1,11 +1,15 @@
 import pygame
 
+__all__ = ['background', 'circle', 'constrain', 'createCanvas', 'fill', 'floor', 'height', 'noFill', 'noStroke',
+           'point', 'rect', 'run', 'stroke', 'strokeWeight', 'width']
+
 # Global variables
-screen = None
+screen: pygame.Surface = None
 stroke_color = None
 stroke_width = 0
 fill_color = None
 _width, _height = (100, 100)
+shape = None
 
 def createCanvas(w, h):
   global screen, _width, _height
@@ -32,11 +36,21 @@ def noFill():
   global fill_color
   fill_color = None
 
+def args_to_color(args):
+  size = len(args)
+  if size == 1:
+    v = args[0]
+    return pygame.Color(v, v, v)
+  elif size == 2:
+    v, a = args
+    # print(v, a, pygame.Color(v, v, v, a) )
+    return pygame.Color(v, v, v, a)
+  else:
+    return pygame.Color(*args)
+
 def stroke(*args):
   global stroke_color
-  if len(args) == 1:
-    args = args * 3
-  stroke_color = args
+  stroke_color = args_to_color(args)
 
 def strokeWeight(value):
   global stroke_width
@@ -44,22 +58,33 @@ def strokeWeight(value):
 
 def fill(*args):
   global fill_color
-  if len(args) == 1:
-    args = args * 3
-  fill_color = args
+  fill_color = args_to_color(args)
 
 def point(x, y):
   if stroke_color is not None:
-    screen.lock()
     screen.set_at((x, y), stroke_color)
-    screen.unlock()
 
 def rect(x, y, w, h):
   if stroke_color is not None and stroke_width >= 0:
     pygame.draw.rect(screen, stroke_color, (x, y, w, h), stroke_width)
   if fill_color is not None:
     sw2 = stroke_width + stroke_width
-    pygame.draw.rect(screen, fill_color, (x+stroke_width, y+stroke_width, w - sw2, h - sw2))
+    screen.fill(fill_color, (x+stroke_width, y+stroke_width, w - sw2, h - sw2))
+
+def circle(x, y, r):
+  if stroke_color is not None and stroke_width >= 0:
+    pygame.draw.circle(screen, stroke_color, (x, y), r, stroke_width)
+  if fill_color is not None:
+    sw2 = stroke_width + stroke_width
+
+    if fill_color.a >= 255:
+      pygame.draw.circle(screen, fill_color, (x, y), r - sw2)
+    else:
+      r2 = r + r
+      target_rect = pygame.Rect(x, y, 0, 0).inflate(r2, r2)
+      shape_surf = pygame.Surface(target_rect.size, pygame.SRCALPHA)
+      pygame.draw.circle(shape_surf, fill_color, (r, r), r)
+      screen.blit(shape_surf, target_rect)
 
 def constrain(v, min, max):
   if v < min:
