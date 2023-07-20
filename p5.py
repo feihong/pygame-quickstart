@@ -1,6 +1,7 @@
+import math
 import pygame
 
-__all__ = ['background', 'circle', 'constrain', 'createCanvas', 'fill', 'floor', 'height', 'noFill', 'noStroke',
+__all__ = ['background', 'circle', 'constrain', 'createCanvas', 'fill', 'floor', 'height', 'map', 'noFill', 'noStroke',
            'point', 'rect', 'run', 'stroke', 'strokeWeight', 'width']
 
 # Global variables
@@ -60,17 +61,6 @@ def fill(*args):
   global fill_color
   fill_color = args_to_color(args)
 
-def point(x, y):
-  if stroke_color is not None:
-    screen.set_at((x, y), stroke_color)
-
-def rect(x, y, w, h):
-  if stroke_color is not None and stroke_width >= 0:
-    pygame.draw.rect(screen, stroke_color, (x, y, w, h), stroke_width)
-  if fill_color is not None:
-    sw2 = stroke_width + stroke_width
-    screen.fill(fill_color, (x+stroke_width, y+stroke_width, w - sw2, h - sw2))
-
 def circle(x, y, r):
   if stroke_color is not None and stroke_width >= 0:
     pygame.draw.circle(screen, stroke_color, (x, y), r, stroke_width)
@@ -86,6 +76,20 @@ def circle(x, y, r):
       pygame.draw.circle(shape_surf, fill_color, (r, r), r)
       screen.blit(shape_surf, target_rect)
 
+def point(x, y):
+  if stroke_color is not None:
+    if stroke_width > 1:
+      circle(x, y, stroke_width)
+    else:
+      screen.set_at((math.floor(x), math.floor(y)), stroke_color)
+
+def rect(x, y, w, h):
+  if stroke_color is not None and stroke_width >= 0:
+    pygame.draw.rect(screen, stroke_color, (x, y, w, h), stroke_width)
+  if fill_color is not None:
+    sw2 = stroke_width + stroke_width
+    screen.fill(fill_color, (x+stroke_width, y+stroke_width, w - sw2, h - sw2))
+
 def constrain(v, min, max):
   if v < min:
     return min
@@ -93,6 +97,13 @@ def constrain(v, min, max):
     return max
   else:
     return v
+
+def map(n, start1, stop1, start2, stop2,):
+  newval = (n - start1) / (stop1 - start1) * (stop2 - start2) + start2
+  if start2 < stop2:
+    return constrain(newval, start2, stop2)
+  else:
+    return constrain(newval, stop2, start2)
 
 def not_implemented_function(message):
   def result(*args):
