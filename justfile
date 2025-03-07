@@ -1,2 +1,2 @@
 install:
-  pip install pygame jurigged
+  pip install pygame reloading
