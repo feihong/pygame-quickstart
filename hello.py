@@ -1,31 +1,58 @@
+"""
+Show Hello World in all the fonts accessible to pygame
+"""
 import pygame
-import pygame.freetype
 
 pygame.init()
 pygame.display.set_caption('Hello World')
 
-pygame.freetype.init()
-print(pygame.freetype.get_default_font())
-my_font = pygame.freetype.SysFont('Arial', 48)
+screen = pygame.display.set_mode((640, 240))
+clock = pygame.time.Clock()
 
-screen = pygame.display.set_mode((480, 240))
+# fonts = ['arialunicode', 'pingfang', 'songti', 'stheitilight', 'stheitimedium']
+fonts = pygame.font.get_fonts()
+fonts.sort()
+current_font = 0
 
-running = True
+def get_font(size):
+  return pygame.font.Font(pygame.font.match_font(fonts[current_font]), size)
 
-while running:
+font = get_font(48)
+small_font = pygame.font.Font(pygame.font.match_font('arialunicode'), 24)
+black = (0,0,0)
+
+def draw_text(font, text, dest):
+  try:
+    screen.blit(pygame.font.Font.render(font, text, True, 'black'), dest)
+  except pygame.error as e:
+    print(e)
+
+while True:
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
-      running = False
+      pygame.quit()
+      raise SystemExit
+    elif event.type == pygame.KEYDOWN:
+      if event.key == pygame.K_RIGHT:
+        current_font += 1
+      elif event.key == pygame.K_LEFT:
+        current_font -= 1
+      elif event.key == pygame.K_UP:
+        current_font -= 25
+      elif event.key == pygame.K_DOWN:
+        current_font += 25
 
-  screen.fill((255,255,255))
+      current_font = current_font % len(fonts)
+      font = get_font(48)
+      print(current_font)
 
-  # text_surface, rect = my_font.render('Hello World!', (0, 0, 0))
-  # screen.blit(text_surface, (20, 50))
+  screen.fill('white')
 
-  my_font.render_to(screen, (20, 50), 'Hello World!', (0, 0, 0))
-  # Doesn't work for some reason
-  my_font.render_to(screen, (50, 100), '你好世界！', (0, 0, 0))
+  draw_text(small_font, f'Font: {fonts[current_font]} ({current_font + 1} of {len(fonts)})', (20, 10))
+
+  draw_text(font, 'Hello World!', (20, 60))
+
+  draw_text(font, '你好世界！', (20, 120))
 
   pygame.display.flip()
-
-pygame.quit()
+  clock.tick(30)

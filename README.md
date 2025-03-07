@@ -4,7 +4,7 @@
 
 Install Python, then run
 
-    pip install pygame
+    just install
 
 ## Commands
 
