@@ -10,16 +10,17 @@ width = 1000
 height = 800
 screen = pg.get_screen(width, height)
 
+initial_coords = [(width // 2, height // 2)]
 color_names = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet']
-coords = [(width // 2, height // 2)]
+coords = initial_coords
 
 def on_event(event):
-    global coords, colors, width
+    global coords, colors
 
     if event.type == pygame.MOUSEBUTTONDOWN:
         coords.append(pygame.mouse.get_pos())
     elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-        coords = [(width // 2, height // 2)]
+        coords = initial_coords
         screen.fill('black')
 
 def loop():

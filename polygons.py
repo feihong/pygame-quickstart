@@ -1,11 +1,9 @@
 """
-Every line is connected to the previous line. Line colors cycle through the colors of the rainbow.
+Click to add more vertices. Press SPACE to draw the polygon using the latest points.
 """
-import random
 import itertools
 import pygame
 import pg
-from reloading import reloading
 
 width = 1000
 height = 800
