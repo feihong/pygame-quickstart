@@ -14,7 +14,7 @@ Run aliens example
 
 ## Todo
 
-- Implement hot reload using watchdog
+- Remember window position from last run
 
 ## Links
 

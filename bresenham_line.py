@@ -4,8 +4,10 @@
 - Right line is drawn using Besenham algorithm
 """
 import pygame
+import pygame.gfxdraw
 import pg
 
+pg.set_caption('Bresenham Line')
 width = 1000
 height = 800
 screen = pg.get_screen(width, height)
@@ -13,38 +15,50 @@ screen = pg.get_screen(width, height)
 screen_rect = pygame.Rect(0, 0, width, height)
 center = (width // 2, height // 2)
 shift_width = 250
+aliased = True
+white = (255, 255, 255)
 
-def draw_vertical_line(p):
-    pygame.draw.line(screen, 'white', (p[0], 0), (p[0], height))
-
-def draw_naive_line(p1, p2):
-    if p1[0] == p2[0]:
-        draw_vertical_line(p1)
-    else:
-        m = (p1[1] - p2[1]) / (p1[0] - p2[0])
-        b = p1[1] - m * p1[0]
-        coords = screen_rect.clipline(0, b, width, m * width + b)
-        for x in range(coords[0][0], coords[1][0]):
-            y = m * x + b
-            screen.set_at((x, int(y)), 'white')
-
-def draw_pygame_line(p1, p2):
-    if p1[0] == p2[0]:
-        draw_vertical_line(p1)
-    else:
-        m = (p1[1] - p2[1]) / (p1[0] - p2[0])
-        b = p1[1] - m * p1[0]
-        coords = screen_rect.clipline(0, b, width, m * width + b)
-        pygame.draw.line(screen, 'white', *coords)
-
-def draw_besenham_line(p1, p2):
-    if p1[0] == p2[0]:
-        draw_vertical_line(p1)
-        return
-
+def get_big_line_coords(p1, p2):
+    """
+    Given two points, return the coordinates of a line that passes through those two points and spans the entire window.
+    If the calculation fails, draw a vertical line.
+    """
     m = (p1[1] - p2[1]) / (p1[0] - p2[0])
     b = p1[1] - m * p1[0]
-    (x0, y0), (x1, y1) = screen_rect.clipline(0, b, width, m * width + b)
+    coords = screen_rect.clipline(0, b, width, m * width + b)
+    return coords, m, b
+
+def draw_line(p1, p2):
+    if aliased:
+        pygame.draw.line(screen, white, p1, p2)
+    else:
+        pygame.gfxdraw.line(screen, p1[0], p1[1], p2[0], p2[1], white)
+
+def draw_vertical_line_if_error(fn):
+    def result(p1, p2):
+        try:
+            fn(p1, p2)
+        except ZeroDivisionError:
+            draw_line((p1[0], 0), (p1[0], height))
+
+    return result
+
+@draw_vertical_line_if_error
+def draw_naive_line(p1, p2):
+    coords, m, b = get_big_line_coords(p1, p2)
+    for x in range(coords[0][0], coords[1][0]):
+        y = m * x + b
+        screen.set_at((x, int(y)), 'white')
+
+@draw_vertical_line_if_error
+def draw_pygame_line(p1, p2):
+    coords, _, _ = get_big_line_coords(p1, p2)
+    draw_line(*coords)
+
+@draw_vertical_line_if_error
+def draw_besenham_line(p1, p2):
+    coords, _, _ = get_big_line_coords(p1, p2)
+    (x0, y0), (x1, y1) = coords
 
     dx = abs(x1 - x0)
     sx = 1 if x0 < x1 else -1
@@ -64,7 +78,12 @@ def draw_besenham_line(p1, p2):
             err += dx
             y0 += sy
 
-def loop():
+def on_event(event):
+    global aliased
+    if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
+        aliased = not aliased
+
+def draw():
     screen.fill('black')
 
     pos = pygame.mouse.get_pos()
@@ -75,4 +94,5 @@ def loop():
 
     draw_besenham_line((center[0] + shift_width, center[1]), (pos[0] + shift_width, pos[1]))
 
-pg.run('Bresenham Line', loop)
+if __name__ == '__main__':
+    pg.run(draw, on_event)

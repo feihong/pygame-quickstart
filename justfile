@@ -1,2 +1,2 @@
 install:
-  pip install pygame reloading watchdog
+  pip install pygame watchfiles reloading
