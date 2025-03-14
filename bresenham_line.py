@@ -15,8 +15,8 @@ screen = pg.get_screen(width, height)
 screen_rect = pygame.Rect(0, 0, width, height)
 center = (width // 2, height // 2)
 shift_width = 250
-aliased = True
-white = (255, 255, 255)
+use_gfx = False
+line_color = (0, 0, 0)
 
 def get_big_line_coords(p1, p2):
     """
@@ -29,10 +29,10 @@ def get_big_line_coords(p1, p2):
     return coords, m, b
 
 def draw_line(p1, p2):
-    if aliased:
-        pygame.draw.line(screen, white, p1, p2)
+    if use_gfx:
+        pygame.gfxdraw.line(screen, p1[0], p1[1], p2[0], p2[1], line_color)
     else:
-        pygame.gfxdraw.line(screen, p1[0], p1[1], p2[0], p2[1], white)
+        pygame.draw.line(screen, line_color, p1, p2)
 
 def draw_vertical_line_if_error(fn):
     def result(p1, p2):
@@ -48,7 +48,7 @@ def draw_naive_line(p1, p2):
     coords, m, b = get_big_line_coords(p1, p2)
     for x in range(coords[0][0], coords[1][0]):
         y = m * x + b
-        screen.set_at((x, int(y)), 'white')
+        screen.set_at((x, int(y)), line_color)
 
 @draw_vertical_line_if_error
 def draw_pygame_line(p1, p2):
@@ -56,7 +56,7 @@ def draw_pygame_line(p1, p2):
     draw_line(*coords)
 
 @draw_vertical_line_if_error
-def draw_besenham_line(p1, p2):
+def draw_bresenham_line(p1, p2):
     coords, _, _ = get_big_line_coords(p1, p2)
     (x0, y0), (x1, y1) = coords
 
@@ -67,7 +67,7 @@ def draw_besenham_line(p1, p2):
     err = dx + dy
 
     while True:
-        screen.set_at((x0, y0), 'white')
+        screen.set_at((x0, y0), line_color)
         if x0 == x1 and y0 == y1:
             break
         e2 = 2 * err
@@ -80,19 +80,19 @@ def draw_besenham_line(p1, p2):
 
 def on_event(event):
     global aliased
-    if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
-        aliased = not aliased
+    if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
+        use_gfx = not use_gfx
 
 def draw():
-    screen.fill('black')
+    screen.fill('white')
 
     pos = pygame.mouse.get_pos()
 
-    draw_pygame_line(center, pos)
-
     draw_naive_line((center[0] - shift_width, center[1]), (pos[0] - shift_width, pos[1]))
 
-    draw_besenham_line((center[0] + shift_width, center[1]), (pos[0] + shift_width, pos[1]))
+    draw_pygame_line(center, pos)
+
+    draw_bresenham_line((center[0] + shift_width, center[1]), (pos[0] + shift_width, pos[1]))
 
 if __name__ == '__main__':
     pg.run(draw, on_event)
