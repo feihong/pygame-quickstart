@@ -5,6 +5,7 @@ import itertools
 import pygame
 import pg
 
+pg.set_caption('Polygons')
 width = 1000
 height = 800
 screen = pg.get_screen(width, height)
@@ -24,7 +25,7 @@ def on_event(event):
             polygons.append(coords[:])
             coords = []
 
-def loop():
+def draw():
     for color_name, polygon in zip(itertools.cycle(color_names), polygons):
         pygame.draw.polygon(screen, color_name, polygon)
 
@@ -33,4 +34,5 @@ def loop():
         point2 = pygame.mouse.get_pos()
         pygame.draw.line(screen, 'white', point1, point2)
 
-pg.run('Polygons', loop, on_event)
+if __name__ == '__main__':
+    pg.run(draw, on_event)

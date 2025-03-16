@@ -12,9 +12,9 @@ Run aliens example
 
     python -m pygame.examples.aliens
 
-## Todo
+Run Pygame program (which uses `pg`) with live reload:
 
-- Remember window position from last run
+    python pg.py polygons.py
 
 ## Links
 
